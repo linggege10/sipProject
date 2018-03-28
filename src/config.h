@@ -1,14 +1,25 @@
-//
-// Created by root on 18-3-26.
-//
+#pragma  once
+#include <string>
+#include <iostream>
+#define COMMENT_CHAR '#'//注释符
+using namespace std;
 
-#ifndef SIPPROJECT_CONFIG_H
-#define SIPPROJECT_CONFIG_H
 
 
-class config {
+class ReadProperties
+{
+private :
+	ifstream *infile;
+public:
+	string user;
+	string password;
+	string simulationDevice;
+	string serverIp;
+	string serverId;
+	string myIp;
 
+	//参数name，配置项的名字
+	//返回值，对应配置项name的value值
+	string getValue(const char * cfgfilepath,const string & name);
+	void  initConfig();
 };
-
-
-#endif //SIPPROJECT_CONFIG_H

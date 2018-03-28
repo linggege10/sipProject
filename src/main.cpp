@@ -4,21 +4,53 @@
 #include <osip2/osip.h>
 #include <unistd.h>
 #include <netinet/in.h>
+#include <string.h>
+#include <string>
+#include <iostream>
+#include "Markup.h"
+#include "XEvent.h"
+#include "config.h"
+#include "eventHandle.h"
 
 
+using namespace std;
 
 
 void process_event();
-void Register();
+
 int m_nregid=0;//注册id
+
+XEventBase *base = new Epoll(1024);
+
+
+void hello_cb2(TimerEvent *te, int a)
+{
+    cout << "Hello world cb2:" << a << endl;
+    base->add_timer(te);
+}
+ReadProperties prop;
 int main()
 {
+
+//    //使用方法1 添加普通函数
+//    base->add_timer(new TimerEvent(milliseconds(5000)), hello_cb2, 444);
+//    base->loop();
+//
+    el::Configurations conf("/home/hzl/project/github/echoServer/sipProject/src/log.conf");
+    el::Loggers::reconfigureAllLoggers(conf);
+//
+//    LOG(TRACE)   << "***** trace log  *****";
+//    LOG(DEBUG)   << "***** debug log  *****";
+//    LOG(ERROR)   << "***** error log  *****";
+//    LOG(WARNING) << "***** warning log  *****";
+
+
     int i=0;
     i=eXosip_init();
     if(i!=0)
         return -1;
     printf("=========  %s\n",eXosip_get_version());
-    unsigned short port=5066;//本地sip端口
+    unsigned short port=5067;//本地sip端口
 
     i=eXosip_listen_addr(IPPROTO_UDP,NULL,port,AF_INET,0);//17是udp，不想过多的引入头文件，故用数字表示一下
     if(i!=0)
@@ -27,12 +59,21 @@ int main()
         eXosip_quit();
         return -1;
     }
-    Register();
+    eventHandle eHandle;
+
+
+    eHandle.Register(prop);
+
     process_event();
     sleep(5000);
 
     getchar();
     return 0;
+
+
+
+
+
 }
 
 
@@ -62,25 +103,16 @@ void process_event()
 
         }else if(event->type==EXOSIP_IN_SUBSCRIPTION_NEW){
 
+            eventHandle eh;
+            eh.eventSubscription(event,prop);
+
 
 
 
 
         }else if(event->type==EXOSIP_MESSAGE_NEW){
-
-
-            osip_body_t *body;
-            osip_message_get_body (event->request, 0, &body);
-            printf ("I get the msg is: %s/n", body->body);
-
-
-            osip_message_t * answer;
-            eXosip_message_build_answer (event->tid, 200,&answer);
-            eXosip_message_send_answer (event->tid, 200,answer);
-
-
-
-
+            eventHandle eh;
+           eh.eventMessage(event,prop);
 
 
         }
@@ -99,6 +131,7 @@ void process_event()
             if(event->response && event->response->status_code==401)
 
             {
+
                 printf("======  401   =%d\n",event->rid);
 //#if 0
 //                osip_message_t *reg = NULL;
@@ -110,7 +143,7 @@ void process_event()
 //                        char realm[256];
 //                        eXosip_clear_authentication_info();
 //                        strcpy(realm,osip_www_authenticate_get_realm(dest));
-//                        eXosip_add_authentication_info("022000000110000","022000000110000","123456", "MD5",realm);
+//                eXosip_add_authentication_info("33030000001180000002","33030000001180000002","123456", "MD5",NULL);
 //			eXosip_register_build_register(event->rid, 3600, &reg);
 //			if(reg==NULL)
 //			{
@@ -128,6 +161,11 @@ void process_event()
         }
         else if(event->type==EXOSIP_REGISTRATION_SUCCESS)
         {
+            char *registerUser=event->response->from->url->username;
+            string registerUserString=registerUser;
+
+            LOG(INFO)    << registerUserString+"register sccess";
+
             printf("register sccess!\n");
         }
 
@@ -141,30 +179,3 @@ void process_event()
 
 
 
-void Register()
-
-{
-    printf("1 ======  Register()\n");
-
-    char fromuser[256];
-    char proxy[256];
-    char route[256];
-    char contact[256];
-
-    sprintf(fromuser,"sip:%s@%s","33030000001180000002","192.168.11.130:5160");
-    sprintf(proxy,"sip:%s@%s","33030000001180000002","122.224.82.77:5160");
-   // sprintf(route,"<sip:%s:%d;lr>","122.224.82.77",5160);
-    sprintf(contact,"<sip:%s:%s>","33030000001180000002","192.168.11.130:5000");
-
-    eXosip_clear_authentication_info();
-    osip_message_t *reg = NULL;
-    m_nregid = eXosip_register_build_initial_register(fromuser, proxy, contact,3600,&reg);
-    //提前输入了验证信息，在消息为401处，用eXosip_automatic_action()自动处理
-    eXosip_add_authentication_info("33030000001180000002","33030000001180000002","123456", "MD5",NULL);
-    if(reg==NULL)
-        return;
-   // osip_message_set_route(reg,route);
-    if(eXosip_register_send_register(m_nregid, reg)!=0)
-        return ;
-
-}
