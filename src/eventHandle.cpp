@@ -141,7 +141,7 @@ void eventHandle::eventSubscription(eXosip_event *event,ReadProperties &prop ){
     xmlanswer.AddElem("CmdType", "Catalog");
     xmlanswer.AddElem("SN", SN);
     xmlanswer.AddElem("DeviceID", DeviceID);
-
+    xmlanswer.AddElem("Result", "OK");
     eXosip_insubscription_build_answer (event->tid, 200,&answer);
     osip_message_set_content_type(answer, "Application/MANSCDP+xml");
     osip_message_set_body(answer, xmlanswer.GetDoc().c_str(), strlen( xmlanswer.GetDoc().c_str()));

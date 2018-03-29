@@ -61,7 +61,7 @@ int main()
 
 
     eHandle.Register(prop);
-    eHandle.invite(prop);
+   // eHandle.invite(prop);
 
 
 
