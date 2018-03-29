@@ -8,9 +8,10 @@
 #include <string>
 #include <iostream>
 #include "Markup.h"
-#include "XEvent.h"
 #include "config.h"
 #include "eventHandle.h"
+#include "easylogging++.h"
+
 
 
 using namespace std;
@@ -20,22 +21,19 @@ void process_event();
 
 int m_nregid=0;//注册id
 
-XEventBase *base = new Epoll(1024);
-
-
-void hello_cb2(TimerEvent *te, int a)
-{
-    cout << "Hello world cb2:" << a << endl;
-    base->add_timer(te);
-}
+//XEventBase *base = new Epoll(1024);
+//
+//
+//void hello_cb2(TimerEvent *te, int a)
+//{
+//    cout << "Hello world cb2:" << a << endl;
+//    base->add_timer(te);
+//}
 ReadProperties prop;
 int main()
 {
 
-//    //使用方法1 添加普通函数
-//    base->add_timer(new TimerEvent(milliseconds(5000)), hello_cb2, 444);
-//    base->loop();
-//
+
     el::Configurations conf("/home/hzl/project/github/echoServer/sipProject/src/log.conf");
     el::Loggers::reconfigureAllLoggers(conf);
 //
@@ -63,6 +61,9 @@ int main()
 
 
     eHandle.Register(prop);
+    eHandle.invite(prop);
+
+
 
     process_event();
     sleep(5000);

@@ -9,6 +9,7 @@
 #include <osip2/osip_mt.h>
 #include <osip2/osip.h>
 #include "config.h"
+#include "easylogging++.h"
 
 
 class eventHandle {
@@ -21,6 +22,8 @@ public:
     void Register(ReadProperties &prop);
 
     void eventSubscription(eXosip_event *event,ReadProperties &prop );
+
+    void invite(ReadProperties &prop );
 
 
 

@@ -55,6 +55,7 @@ void  ReadProperties::initConfig(){
     serverIp=getValue(cfgfilepath,"serverIp");
     serverId=getValue(cfgfilepath,"serverId");
     myIp=getValue(cfgfilepath,"myIp");
+    keepLiveSecond=getValue(cfgfilepath,"keepLiveSecond");
 
 }
 
